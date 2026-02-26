@@ -1,0 +1,19 @@
+<%- include('./partials/header') %>
+
+<main>
+    <section class="form-container">
+        <h1>Join Neny Loans</h1>
+        <p>Start your journey to home ownership today.</p>
+        
+        <form action="/register" method="POST" class="loan-form">
+            <input type="text" name="first_name" placeholder="First Name" required>
+            <input type="text" name="last_name" placeholder="Last Name" required>
+            <input type="email" name="email" placeholder="Email Address" required>
+            <input type="password" name="password" placeholder="Create Password" required>
+            
+            <button type="submit" class="btn">Create Account</button>
+        </form>
+    </section>
+</main>
+
+<%- include('./partials/footer') %>
