@@ -54,9 +54,9 @@ All test accounts use the password: P@$$w0rd!
 **Role And Email**
 
 | Role          | Email               |
-| ------------- | ------------------- | --- |
+| ------------- | ------------------- |
 | Admin         | admin@example.com   |
-| Loan Manager  | manager@example.com |     |
+| Loan Manager  | manager@example.com |
 | Standard User | user@example.com    |
 
 **Technology Stack**
