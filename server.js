@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import path from "path"; 
+import path from "path";
 import staticRoutes from "./routes/routes.js";
 
 dotenv.config();
