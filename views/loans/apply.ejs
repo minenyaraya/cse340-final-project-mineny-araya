@@ -1,0 +1,27 @@
+<% if (title) { %>
+  <h1><%= title %></h1>
+<% } else { %>
+  <h1>Apply for a Loan</h1>
+<% } %>
+
+<%- messages() %>
+
+<% if (errors) { %>
+  <ul class="notice">
+  <% errors.array().forEach(error => { %>
+    <li><%= error.msg %></li>
+  <% }) %>
+  </ul>
+<% } %>
+
+<div class="loan-form">
+  <form action="/loans/apply" method="post">
+    <label for="loan_amount">Loan Amount (USD):</label>
+    <input type="number" name="loan_amount" id="loan_amount" required value="<%= locals.loan_amount %>">
+    
+    <label for="loan_purpose">Loan Purpose:</label>
+    <textarea name="loan_purpose" id="loan_purpose" required><%= locals.loan_purpose %></textarea>
+    
+    <button type="submit">Submit Application</button>
+  </form>
+</div>

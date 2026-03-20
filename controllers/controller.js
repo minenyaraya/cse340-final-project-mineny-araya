@@ -1,4 +1,4 @@
-import pool from "../database/db-connection.js";
+import bcrypt from "bcryptjs";
 import accountModel from "../models/account-model.js";
 import Util from "../utilities/index.js";
 
@@ -11,41 +11,65 @@ controllers.buildHome = async function (req, res) {
 
 controllers.buildRegister = async function (req, res) {
   const nav = await Util.getNav();
-  res.render("register", { title: "Join Neny Loans", nav });
+  res.render("register", { title: "Register", nav, errors: null });
 };
 
 controllers.buildLogin = async function (req, res) {
   const nav = await Util.getNav();
-  res.render("login", { title: "Login", nav });
-};
-
-controllers.getClassifications = async function (req, res) {
-  const nav = await Util.getNav();
-  res.render("inventory", { title: "Inventory List", nav });
+  res.render("login", { title: "Login", nav, errors: null });
 };
 
 controllers.registerUser = async function (req, res) {
-  let nav = await Util.getNav();
+  const { user_first_name, user_last_name, user_email, user_password } =
+    req.body;
+
+  let hashedPassword;
   try {
-    const {
-      account_firstname,
-      account_lastname,
-      account_email,
-      account_password,
-    } = req.body;
-
-    await accountModel.registerAccount(
-      account_firstname,
-      account_lastname,
-      account_email,
-      account_password,
-    );
-
-    res.render("index", { title: "Home", nav });
+    hashedPassword = await bcrypt.hashSync(user_password, 10);
   } catch (error) {
-    console.error("Registration error:", error);
-    res.render("register", { title: "Registration Failed", nav });
+    return res.status(500).send("Error encrypting password");
   }
+
+  const regResult = await accountModel.registerAccount(
+    user_first_name,
+    user_last_name,
+    user_email,
+    hashedPassword,
+  );
+
+  if (regResult) {
+    const nav = await Util.getNav();
+    res.render("login", { title: "Login", nav, errors: null });
+  } else {
+    res.status(500).send("Registration failed");
+  }
+};
+
+controllers.loginUser = async function (req, res) {
+  const { user_email, user_password } = req.body;
+  const accountData = await accountModel.loginAccount(user_email);
+
+  if (!accountData) {
+    return res.status(400).send("Email not found");
+  }
+
+  try {
+    if (await bcrypt.compare(user_password, accountData.user_password)) {
+      delete accountData.user_password;
+      req.session.accountData = accountData;
+      req.session.loggedin = true;
+      return res.redirect("/");
+    } else {
+      return res.status(400).send("Wrong password");
+    }
+  } catch (error) {
+    return res.status(500).send("Login error");
+  }
+};
+
+controllers.buildClient = async function (req, res) {
+  const nav = await Util.getNav();
+  res.render("client", { title: "Client", nav });
 };
 
 export default controllers;
