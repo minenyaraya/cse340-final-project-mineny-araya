@@ -9,16 +9,19 @@ loanCont.buildLoanApplication = async function (req, res, next) {
     title: "Apply for a Home Loan",
     nav,
     errors: null,
+    loan_amount: "",
+    loan_purpose: "",
   });
 };
 
 loanCont.processApplication = async function (req, res) {
   let nav = await utilities.getNav();
   const { loan_amount, loan_purpose } = req.body;
-  const account_id = res.locals.accountData.account_id;
+
+  const user_id = req.session.accountData.user_id;
 
   const result = await loanModel.createLoanApplication(
-    account_id,
+    user_id,
     loan_amount,
     loan_purpose,
   );
@@ -34,8 +37,29 @@ loanCont.processApplication = async function (req, res) {
     res.status(501).render("loans/apply", {
       title: "Apply for a Home Loan",
       nav,
+      errors: null,
+      loan_amount,
+      loan_purpose,
     });
   }
+};
+
+loanCont.buildManagement = async function (req, res) {
+  let nav = await utilities.getNav();
+  const loans = await loanModel.getAllLoans();
+  res.render("loans/management", {
+    title: "Loan Management Dashboard",
+    nav,
+    loans,
+    errors: null,
+  });
+};
+
+loanCont.updateStatus = async function (req, res) {
+  const { loan_id, loan_status } = req.body;
+  await loanModel.updateLoanStatus(loan_id, loan_status);
+  req.flash("notice", "Status updated successfully.");
+  res.redirect("/loans/management");
 };
 
 export default loanCont;

@@ -1,0 +1,43 @@
+<h1><%= title %></h1>
+
+<div class="management-container">
+  <table class="management-table">
+    <thead>
+      <tr>
+        <th>Client</th>
+        <th>Amount</th>
+        <th>Purpose</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (loans && loans.length > 0) { %>
+        <% loans.forEach(loan => { %>
+          <tr>
+            <td><%= loan.user_first_name %> <%= loan.user_last_name %></td>
+            <td>$<%= loan.loan_amount %></td>
+            <td><%= loan.loan_purpose %></td>
+            <td><strong><%= loan.loan_status %></strong></td>
+            <td>
+              <form action="/loans/update-status" method="POST">
+                <input type="hidden" name="loan_id" value="<%= loan.loan_id %>">
+                <select name="loan_status">
+                  <option value="Submitted" <%= loan.loan_status === 'Submitted' ? 'selected' : '' %>>Submitted</option>
+                  <option value="Under Review" <%= loan.loan_status === 'Under Review' ? 'selected' : '' %>>Under Review</option>
+                  <option value="Approved" <%= loan.loan_status === 'Approved' ? 'selected' : '' %>>Approved</option>
+                  <option value="Rejected" <%= loan.loan_status === 'Rejected' ? 'selected' : '' %>>Rejected</option>
+                </select>
+                <button type="submit">Update</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="5">No applications found.</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
