@@ -67,11 +67,15 @@ controllers.registerUser = async function (req, res) {
 controllers.loginUser = async function (req, res) {
   const { user_email, user_password } = req.body;
   const rows = await accountModel.loginAccount(user_email);
-  if (!rows || rows.length === 0) {
+
+  // Extraemos el primer usuario del array de resultados
+  const accountData = Array.isArray(rows) && rows.length > 0 ? rows[0] : rows;
+
+  if (!accountData || !accountData.account_email) {
     req.flash("notice", "Email not found.");
     return res.status(400).redirect("/login");
   }
-  const accountData = rows[0];
+
   try {
     if (await bcrypt.compare(user_password, accountData.account_password)) {
       delete accountData.account_password;
@@ -83,6 +87,7 @@ controllers.loginUser = async function (req, res) {
       return res.status(400).redirect("/login");
     }
   } catch (error) {
+    console.error("Login Error:", error);
     req.flash("notice", "Login error occurred.");
     return res.status(500).redirect("/login");
   }
@@ -94,8 +99,9 @@ controllers.buildClient = async function (req, res) {
   let allAccounts = null;
 
   if (
-    accountData.account_type === "Admin" ||
-    accountData.account_type === "Loan Manager"
+    accountData &&
+    (accountData.account_type === "Admin" ||
+      accountData.account_type === "Loan Manager")
   ) {
     allAccounts = await accountModel.getAllAccounts();
   }
