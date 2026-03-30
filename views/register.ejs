@@ -15,6 +15,16 @@
             <input type="email" name="user_email" placeholder="Email Address" required>
             <input type="password" name="user_password" placeholder="Create Password" required>
             
+            <input type="number" name="initial_investment" placeholder="Initial Investment Amount" required>
+            <input type="number" name="loan_amount" placeholder="Loan Amount Needed" required>
+            
+            <select name="house_type" required>
+                <option value="" disabled selected>Select Property Type</option>
+                <option value="new">New Home</option>
+                <option value="used">Used Home</option>
+                <option value="refinance">Refinance</option>
+            </select>
+
             <button type="submit" class="btn">Create Account</button>
         </form>
     </section>

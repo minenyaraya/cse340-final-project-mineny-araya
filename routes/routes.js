@@ -1,6 +1,6 @@
 import express from "express";
 import controllers from "../controllers/controller.js";
-import { clientCheck } from "../middleware/clientCheck.js";
+import validate from "../middleware/account-validation.js";
 import utilities from "../utilities/index.js";
 
 const router = express.Router();
@@ -14,10 +14,18 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/register", controllers.buildRegister);
-router.post("/register", controllers.registerUser);
+router.post(
+  "/register",
+  validate.registrationRules(),
+  validate.checkRegistrationData,
+  controllers.registerUser,
+);
 
 router.get("/login", controllers.buildLogin);
 router.post("/login", controllers.loginUser);
-router.get("/client", clientCheck, controllers.buildClient);
+
+router.get("/logout", controllers.logoutUser);
+
+router.get("/client", validate.clientCheck, controllers.buildClient);
 
 export default router;

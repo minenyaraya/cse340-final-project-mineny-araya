@@ -1,11 +1,30 @@
-<form action="/login" method="POST">
-  <label>Email</label>
-  <input type="email" name="user_email" required>
+<%- include('./partials/header') %>
 
-  <label>Password</label>
-  <input type="password" name="user_password" required>
+<main>
+    <section class="login-container">
+        <h1>Login to Neny Loans</h1>
 
-  <button type="submit">Login</button>
-</form>
+        <% if (messages.notice) { %>
+            <% messages.notice.forEach(message => { %>
+                <p class="notice"><%= message %></p>
+            <% }) %>
+        <% } %>
+
+        <form action="/login" method="POST">
+            <label>Email Address</label>
+            <input type="email" name="user_email" required placeholder="Enter your email">
+
+            <label>Password</label>
+            <input type="password" name="user_password" required placeholder="Enter your password">
+
+            <button type="submit">Login</button>
+        </form>
+
+        <p>Don't have an account? <a href="/register">Sign up here</a></p>
+    </section>
+</main>
+
+<%- include('./partials/footer') %>
+
 
 

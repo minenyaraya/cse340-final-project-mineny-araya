@@ -5,29 +5,37 @@ import Util from "../utilities/index.js";
 const controllers = {};
 
 controllers.buildHome = async function (req, res) {
-  const nav = await Util.getNav();
+  const nav = await Util.getNav(req.session.loggedin);
   res.render("index", { title: "Home", nav });
 };
 
 controllers.buildRegister = async function (req, res) {
-  const nav = await Util.getNav();
+  const nav = await Util.getNav(req.session.loggedin);
   res.render("register", { title: "Register", nav, errors: null });
 };
 
 controllers.buildLogin = async function (req, res) {
-  const nav = await Util.getNav();
+  const nav = await Util.getNav(req.session.loggedin);
   res.render("login", { title: "Login", nav, errors: null });
 };
 
 controllers.registerUser = async function (req, res) {
-  const { user_first_name, user_last_name, user_email, user_password } =
-    req.body;
+  const {
+    user_first_name,
+    user_last_name,
+    user_email,
+    user_password,
+    initial_investment,
+    loan_amount,
+    house_type,
+  } = req.body;
 
   let hashedPassword;
   try {
     hashedPassword = await bcrypt.hashSync(user_password, 10);
   } catch (error) {
-    return res.status(500).send("Error encrypting password");
+    req.flash("notice", "Error encrypting password.");
+    return res.status(500).redirect("/register");
   }
 
   const regResult = await accountModel.registerAccount(
@@ -35,13 +43,17 @@ controllers.registerUser = async function (req, res) {
     user_last_name,
     user_email,
     hashedPassword,
+    initial_investment,
+    loan_amount,
+    house_type,
   );
 
   if (regResult) {
-    const nav = await Util.getNav();
-    res.render("login", { title: "Login", nav, errors: null });
+    req.flash("notice", "Registration successful. Please log in.");
+    res.status(201).redirect("/login");
   } else {
-    res.status(500).send("Registration failed");
+    req.flash("notice", "Registration failed.");
+    res.status(500).redirect("/register");
   }
 };
 
@@ -50,7 +62,8 @@ controllers.loginUser = async function (req, res) {
   const accountData = await accountModel.loginAccount(user_email);
 
   if (!accountData) {
-    return res.status(400).send("Email not found");
+    req.flash("notice", "Email not found.");
+    return res.status(400).redirect("/login");
   }
 
   try {
@@ -60,16 +73,24 @@ controllers.loginUser = async function (req, res) {
       req.session.loggedin = true;
       return res.redirect("/");
     } else {
-      return res.status(400).send("Wrong password");
+      req.flash("notice", "Wrong password.");
+      return res.status(400).redirect("/login");
     }
   } catch (error) {
-    return res.status(500).send("Login error");
+    req.flash("notice", "Login error.");
+    return res.status(500).redirect("/login");
   }
 };
 
 controllers.buildClient = async function (req, res) {
-  const nav = await Util.getNav();
+  const nav = await Util.getNav(req.session.loggedin);
   res.render("client", { title: "Client", nav });
+};
+
+controllers.logoutUser = async function (req, res) {
+  req.session.destroy();
+  res.clearCookie("connect.sid");
+  return res.redirect("/");
 };
 
 export default controllers;
