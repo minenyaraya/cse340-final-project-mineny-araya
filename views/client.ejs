@@ -11,17 +11,49 @@
             <% }) %>
         <% } %>
 
-        <div class="loan-info">
-            <h2>Your Mortgage Application Status</h2>
-            <p class="status-badge">Current Status: <strong><%= accountData.loan_status %></strong></p>
-            
-            <h3>Application Details</h3>
-            <ul>
-                <li><strong>Down Payment:</strong> $<%= accountData.initial_investment %></li>
-                <li><strong>Credit Requested:</strong> $<%= accountData.loan_amount %></li>
-                <li><strong>Property Category:</strong> <%= accountData.house_type.toUpperCase() %></li>
-            </ul>
-        </div>
+        <% if (accountData.account_type === 'Client') { %>
+            <div class="loan-info">
+                <h2>Your Mortgage Application Status</h2>
+                <p class="status-badge">Current Status: <strong><%= accountData.loan_status %></strong></p>
+                
+                <h3>Application Details</h3>
+                <ul>
+                    <li><strong>Down Payment:</strong> $<%= accountData.initial_investment %></li>
+                    <li><strong>Credit Requested:</strong> $<%= accountData.loan_amount %></li>
+                    <li><strong>Property Category:</strong> <%= accountData.house_type.toUpperCase() %></li>
+                </ul>
+            </div>
+        <% } %>
+
+        <% if (typeof allAccounts !== 'undefined' && allAccounts !== null) { %>
+            <section class="admin-view">
+                <h2>Manage All Loan Applications</h2>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Applicant Name</th>
+                            <th>Email</th>
+                            <th>Loan Amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% allAccounts.forEach(account => { %>
+                            <tr>
+                                <td><%= account.account_firstname %> <%= account.account_lastname %></td>
+                                <td><%= account.account_email %></td>
+                                <td>$<%= account.loan_amount %></td>
+                                <td><strong><%= account.loan_status %></strong></td>
+                                <td>
+                                    <a href="/loans/edit/<%= account.account_id %>" class="btn-edit">Review</a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </section>
+        <% } %>
 
         <p><a href="/logout" class="btn-logout">Logout</a></p>
     </section>
