@@ -3,7 +3,7 @@
 <main>
     <section class="account-container">
         <h1>Welcome, <%= accountData.account_firstname %></h1>
-        <p>You are logged in as a <%= accountData.account_type %>.</p>
+        <p>You are logged in as a <strong><%= accountData.account_type %></strong>.</p>
 
         <% if (messages.notice) { %>
             <% messages.notice.forEach(message => { %>
@@ -12,15 +12,18 @@
         <% } %>
 
         <div class="loan-info">
-            <h2>Your Loan Application Details</h2>
+            <h2>Your Mortgage Application Status</h2>
+            <p class="status-badge">Current Status: <strong><%= accountData.loan_status %></strong></p>
+            
+            <h3>Application Details</h3>
             <ul>
-                <li><strong>Down Payment Provided:</strong> $<%= accountData.initial_investment %></li>
-                <li><strong>Requested Credit Amount:</strong> $<%= accountData.loan_amount %></li>
-                <li><strong>Selected Property Type:</strong> <%= accountData.house_type %></li>
+                <li><strong>Down Payment:</strong> $<%= accountData.initial_investment %></li>
+                <li><strong>Credit Requested:</strong> $<%= accountData.loan_amount %></li>
+                <li><strong>Property Category:</strong> <%= accountData.house_type.toUpperCase() %></li>
             </ul>
         </div>
 
-        <p><a href="/logout">Logout</a></p>
+        <p><a href="/logout" class="btn-logout">Logout</a></p>
     </section>
 </main>
 
