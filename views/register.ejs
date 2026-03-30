@@ -5,24 +5,36 @@
         <h1>Join Neny Loans</h1>
         <p>Start your journey to home ownership today.</p>
 
-        <% if (locals.message) { %>
-            <p class="notice"><%= locals.message %></p>
+        <% if (locals.notice) { %>
+            <p class="notice"><%= locals.notice %></p>
+        <% } %>
+
+        <% if (errors) { %>
+            <ul class="error-list">
+            <% errors.forEach(error => { %>
+                <li><%= error.msg %></li>
+            <% }) %>
+            </ul>
         <% } %>
         
-        <form action="/register" method="POST" class="loan-form">
-            <input type="text" name="user_first_name" placeholder="First Name" required>
-            <input type="text" name="user_last_name" placeholder="Last Name" required>
-            <input type="email" name="user_email" placeholder="Email Address" required>
-            <input type="password" name="user_password" placeholder="Create Password" required>
+        <!-- Añadimos autocomplete="off" aquí -->
+        <form action="/register" method="POST" class="loan-form" autocomplete="off">
+            <input type="text" name="user_first_name" placeholder="First Name" value="<%= user_first_name %>" required autocomplete="off">
+            <input type="text" name="user_last_name" placeholder="Last Name" value="<%= user_last_name %>" required autocomplete="off">
             
-            <input type="number" name="initial_investment" placeholder="Initial Investment Amount" required>
-            <input type="number" name="loan_amount" placeholder="Loan Amount Needed" required>
+            <!-- Usamos un nombre ligeramente distinto o autocomplete="new-password" para engañar al navegador -->
+            <input type="email" name="user_email" placeholder="Email Address" value="<%= user_email %>" required autocomplete="none">
+            
+            <input type="password" name="user_password" placeholder="Create Password" required autocomplete="new-password">
+            
+            <input type="number" name="initial_investment" placeholder="Initial Investment Amount" value="<%= initial_investment %>" required>
+            <input type="number" name="loan_amount" placeholder="Loan Amount Needed" value="<%= loan_amount %>" required>
             
             <select name="house_type" required>
-                <option value="" disabled selected>Select Property Type</option>
-                <option value="new">New Home</option>
-                <option value="used">Used Home</option>
-                <option value="refinance">Refinance</option>
+                <option value="" disabled <%= !house_type ? 'selected' : '' %>>Select Property Type</option>
+                <option value="new" <%= house_type === 'new' ? 'selected' : '' %>>New Home</option>
+                <option value="used" <%= house_type === 'used' ? 'selected' : '' %>>Used Home</option>
+                <option value="refinance" <%= house_type === 'refinance' ? 'selected' : '' %>>Refinance</option>
             </select>
 
             <button type="submit" class="btn">Create Account</button>

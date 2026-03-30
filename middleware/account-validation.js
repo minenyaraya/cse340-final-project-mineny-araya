@@ -8,13 +8,7 @@ validate.registrationRules = () => {
     body("user_first_name").trim().notEmpty(),
     body("user_last_name").trim().notEmpty(),
     body("user_email").isEmail().normalizeEmail(),
-    body("user_password").isStrongPassword({
-      minLength: 12,
-      minLowercase: 1,
-      minUppercase: 1,
-      minNumbers: 1,
-      minSymbols: 1,
-    }),
+    body("user_password").trim().notEmpty().isLength({ min: 5 }),
     body("initial_investment").isNumeric(),
     body("loan_amount").isNumeric(),
     body("house_type").isIn(["new", "used", "refinance"]),
@@ -32,10 +26,9 @@ validate.checkRegistrationData = async (req, res, next) => {
   } = req.body;
   let errors = validationResult(req);
   if (!errors.isEmpty()) {
-    // Pasamos req.session.loggedin para que el nav sepa qué mostrar
     let nav = await Util.getNav(req.session.loggedin);
     res.render("register", {
-      errors,
+      errors: errors.array(),
       title: "Registration",
       nav,
       user_first_name,
@@ -51,7 +44,7 @@ validate.checkRegistrationData = async (req, res, next) => {
 };
 
 validate.checkLogin = (req, res, next) => {
-  if (req.session && req.session.loggedin) {
+  if (req.session.loggedin) {
     next();
   } else {
     return res.redirect("/login");
@@ -59,10 +52,11 @@ validate.checkLogin = (req, res, next) => {
 };
 
 validate.clientCheck = (req, res, next) => {
-  if (!req.session || req.session.user_role !== "Client") {
+  if (req.session.loggedin && req.session.accountData) {
+    next();
+  } else {
     return res.redirect("/login");
   }
-  next();
 };
 
 export default validate;

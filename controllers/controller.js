@@ -11,12 +11,27 @@ controllers.buildHome = async function (req, res) {
 
 controllers.buildRegister = async function (req, res) {
   const nav = await Util.getNav(req.session.loggedin);
-  res.render("register", { title: "Register", nav, errors: null });
+  res.render("register", {
+    title: "Register",
+    nav,
+    errors: null,
+    user_first_name: "",
+    user_last_name: "",
+    user_email: "",
+    initial_investment: "",
+    loan_amount: "",
+    house_type: "",
+  });
 };
 
 controllers.buildLogin = async function (req, res) {
   const nav = await Util.getNav(req.session.loggedin);
-  res.render("login", { title: "Login", nav, errors: null });
+  res.render("login", {
+    title: "Login",
+    nav,
+    errors: null,
+    user_email: "",
+  });
 };
 
 controllers.registerUser = async function (req, res) {
@@ -66,7 +81,7 @@ controllers.loginUser = async function (req, res) {
     return res.status(400).redirect("/login");
   }
 
-  const accountData = rows[0];
+  const accountData = rows;
 
   try {
     if (await bcrypt.compare(user_password, accountData.account_password)) {
@@ -79,7 +94,7 @@ controllers.loginUser = async function (req, res) {
       return res.status(400).redirect("/login");
     }
   } catch (error) {
-    req.flash("notice", "Login error.");
+    req.flash("notice", "Login error occurred.");
     return res.status(500).redirect("/login");
   }
 };
