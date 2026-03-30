@@ -59,7 +59,8 @@ controllers.registerUser = async function (req, res) {
 
 controllers.loginUser = async function (req, res) {
   const { user_email, user_password } = req.body;
-  const accountData = await accountModel.loginAccount(user_email);
+  const rows = await accountModel.loginAccount(user_email);
+  const accountData = rows[0];
 
   if (!accountData) {
     req.flash("notice", "Email not found.");
@@ -67,8 +68,8 @@ controllers.loginUser = async function (req, res) {
   }
 
   try {
-    if (await bcrypt.compare(user_password, accountData.user_password)) {
-      delete accountData.user_password;
+    if (await bcrypt.compare(user_password, accountData.account_password)) {
+      delete accountData.account_password;
       req.session.accountData = accountData;
       req.session.loggedin = true;
       return res.redirect("/");
