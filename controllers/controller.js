@@ -60,12 +60,13 @@ controllers.registerUser = async function (req, res) {
 controllers.loginUser = async function (req, res) {
   const { user_email, user_password } = req.body;
   const rows = await accountModel.loginAccount(user_email);
-  const accountData = rows[0];
 
-  if (!accountData) {
+  if (!rows || rows.length === 0) {
     req.flash("notice", "Email not found.");
     return res.status(400).redirect("/login");
   }
+
+  const accountData = rows[0];
 
   try {
     if (await bcrypt.compare(user_password, accountData.account_password)) {
