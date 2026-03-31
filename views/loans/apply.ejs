@@ -1,7 +1,5 @@
 <% if (title) { %>
   <h1><%= title %></h1>
-<% } else { %>
-  <h1>Apply for a Loan</h1>
 <% } %>
 
 <%- messages() %>
@@ -15,12 +13,20 @@
 <% } %>
 
 <div class="loan-form">
-  <form action="/loans/apply" method="post">
-    <label for="loan_amount">Loan Amount (USD):</label>
+  <form action="/loans/apply" method="POST">
+    <label for="initial_investment">Down Payment (USD):</label>
+    <input type="number" name="initial_investment" id="initial_investment" required value="<%= locals.initial_investment %>">
+    
+    <label for="loan_amount">Loan Amount Requested (USD):</label>
     <input type="number" name="loan_amount" id="loan_amount" required value="<%= locals.loan_amount %>">
     
-    <label for="loan_purpose">Loan Purpose:</label>
-    <textarea name="loan_purpose" id="loan_purpose" required><%= locals.loan_purpose %></textarea>
+    <label for="house_type">Property Category:</label>
+    <select name="house_type" id="house_type" required>
+      <option value="">--Select--</option>
+      <option value="new" <%= locals.house_type === 'new' ? 'selected' : '' %>>New House</option>
+      <option value="used" <%= locals.house_type === 'used' ? 'selected' : '' %>>Used House</option>
+      <option value="refinance" <%= locals.house_type === 'refinance' ? 'selected' : '' %>>Refinance</option>
+    </select>
     
     <button type="submit">Submit Application</button>
   </form>

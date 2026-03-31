@@ -26,7 +26,7 @@ validate.checkRegistrationData = async (req, res, next) => {
   } = req.body;
   let errors = validationResult(req);
   if (!errors.isEmpty()) {
-    let nav = await Util.getNav(req.session.loggedin);
+    let nav = await Util.getNav(req.session.loggedin, req.session.accountData);
     res.render("register", {
       errors: errors.array(),
       title: "Registration",
@@ -43,19 +43,25 @@ validate.checkRegistrationData = async (req, res, next) => {
   next();
 };
 
-validate.checkLogin = (req, res, next) => {
-  if (req.session.loggedin) {
+validate.clientCheck = (req, res, next) => {
+  if (req.session.loggedin && req.session.accountData) {
     next();
   } else {
     return res.redirect("/login");
   }
 };
 
-validate.clientCheck = (req, res, next) => {
-  if (req.session.loggedin && req.session.accountData) {
+validate.adminCheck = (req, res, next) => {
+  if (
+    req.session.loggedin &&
+    req.session.accountData &&
+    (req.session.accountData.account_type === "Admin" ||
+      req.session.accountData.account_type === "Loan Manager")
+  ) {
     next();
   } else {
-    return res.redirect("/login");
+    req.flash("notice", "Access denied. Only Admins or Managers allowed.");
+    return res.redirect("/client");
   }
 };
 

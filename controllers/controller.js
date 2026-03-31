@@ -5,12 +5,12 @@ import Util from "../utilities/index.js";
 const controllers = {};
 
 controllers.buildHome = async function (req, res) {
-  const nav = await Util.getNav(req.session.loggedin);
+  const nav = await Util.getNav(req.session.loggedin, req.session.accountData);
   res.render("index", { title: "Home", nav });
 };
 
 controllers.buildRegister = async function (req, res) {
-  const nav = await Util.getNav(req.session.loggedin);
+  const nav = await Util.getNav(req.session.loggedin, req.session.accountData);
   res.render("register", {
     title: "Register",
     nav,
@@ -25,7 +25,7 @@ controllers.buildRegister = async function (req, res) {
 };
 
 controllers.buildLogin = async function (req, res) {
-  const nav = await Util.getNav(req.session.loggedin);
+  const nav = await Util.getNav(req.session.loggedin, req.session.accountData);
   res.render("login", { title: "Login", nav, errors: null, user_email: "" });
 };
 
@@ -39,13 +39,7 @@ controllers.registerUser = async function (req, res) {
     loan_amount,
     house_type,
   } = req.body;
-  let hashedPassword;
-  try {
-    hashedPassword = await bcrypt.hashSync(user_password, 10);
-  } catch (error) {
-    req.flash("notice", "Error encrypting password.");
-    return res.status(500).redirect("/register");
-  }
+  let hashedPassword = bcrypt.hashSync(user_password, 10);
   const regResult = await accountModel.registerAccount(
     user_first_name,
     user_last_name,
@@ -65,11 +59,10 @@ controllers.registerUser = async function (req, res) {
 };
 
 controllers.loginUser = async function (req, res) {
-  const { user_email, user_password } = req.body;
-  const rows = await accountModel.loginAccount(user_email);
+  let { user_email, user_password } = req.body;
+  user_email = user_email.trim().toLowerCase();
 
-  // Extraemos el primer usuario del array de resultados
-  const accountData = Array.isArray(rows) && rows.length > 0 ? rows[0] : rows;
+  const accountData = await accountModel.loginAccount(user_email);
 
   if (!accountData || !accountData.account_email) {
     req.flash("notice", "Email not found.");
@@ -77,7 +70,12 @@ controllers.loginUser = async function (req, res) {
   }
 
   try {
-    if (await bcrypt.compare(user_password, accountData.account_password)) {
+    if (
+      await bcrypt.compare(
+        user_password.trim(),
+        accountData.account_password.trim(),
+      )
+    ) {
       delete accountData.account_password;
       req.session.accountData = accountData;
       req.session.loggedin = true;
@@ -87,14 +85,13 @@ controllers.loginUser = async function (req, res) {
       return res.status(400).redirect("/login");
     }
   } catch (error) {
-    console.error("Login Error:", error);
     req.flash("notice", "Login error occurred.");
     return res.status(500).redirect("/login");
   }
 };
 
 controllers.buildClient = async function (req, res) {
-  const nav = await Util.getNav(req.session.loggedin);
+  const nav = await Util.getNav(req.session.loggedin, req.session.accountData);
   const accountData = req.session.accountData;
   let allAccounts = null;
 
@@ -112,6 +109,22 @@ controllers.buildClient = async function (req, res) {
     accountData,
     allAccounts,
   });
+};
+
+controllers.updateLoanStatus = async function (req, res) {
+  const { account_id, loan_status } = req.body;
+
+  const updateResult = await accountModel.updateLoanStatus(
+    account_id,
+    loan_status,
+  );
+
+  if (updateResult) {
+    req.flash("notice", "Status updated successfully.");
+  } else {
+    req.flash("notice", "Update failed.");
+  }
+  res.redirect("/client");
 };
 
 controllers.logoutUser = async function (req, res) {

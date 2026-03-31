@@ -20,7 +20,7 @@
                 <ul>
                     <li><strong>Down Payment:</strong> $<%= accountData.initial_investment %></li>
                     <li><strong>Credit Requested:</strong> $<%= accountData.loan_amount %></li>
-                    <li><strong>Property Category:</strong> <%= accountData.house_type.toUpperCase() %></li>
+                    <li><strong>Property Category:</strong> <%= accountData.house_type ? accountData.house_type.toUpperCase() : 'N/A' %></li>
                 </ul>
             </div>
         <% } %>
@@ -34,21 +34,32 @@
                             <th>Applicant Name</th>
                             <th>Email</th>
                             <th>Loan Amount</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>Current Status</th>
+                            <th>Update Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         <% allAccounts.forEach(account => { %>
+                            <% if (account.account_type === 'Client') { %>
                             <tr>
                                 <td><%= account.account_firstname %> <%= account.account_lastname %></td>
                                 <td><%= account.account_email %></td>
                                 <td>$<%= account.loan_amount %></td>
                                 <td><strong><%= account.loan_status %></strong></td>
                                 <td>
-                                    <a href="/loans/edit/<%= account.account_id %>" class="btn-edit">Review</a>
+                                    <form action="/account/update-status" method="POST" class="update-status-form">
+                                        <input type="hidden" name="account_id" value="<%= account.account_id %>">
+                                        <select name="loan_status">
+                                            <option value="Pending" <%= account.loan_status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                            <option value="Under Review" <%= account.loan_status === 'Under Review' ? 'selected' : '' %>>Under Review</option>
+                                            <option value="Approved" <%= account.loan_status === 'Approved' ? 'selected' : '' %>>Approved</option>
+                                            <option value="Rejected" <%= account.loan_status === 'Rejected' ? 'selected' : '' %>>Rejected</option>
+                                        </select>
+                                        <button type="submit" class="btn-update">Save</button>
+                                    </form>
                                 </td>
                             </tr>
+                            <% } %>
                         <% }) %>
                     </tbody>
                 </table>

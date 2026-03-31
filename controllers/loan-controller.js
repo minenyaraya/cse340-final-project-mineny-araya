@@ -4,62 +4,70 @@ import utilities from "../utilities/index.js";
 const loanCont = {};
 
 loanCont.buildLoanApplication = async function (req, res, next) {
-  let nav = await utilities.getNav();
+  let nav = await utilities.getNav(
+    req.session.loggedin,
+    req.session.accountData,
+  );
   res.render("loans/apply", {
     title: "Apply for a Home Loan",
     nav,
     errors: null,
+    initial_investment: "",
     loan_amount: "",
-    loan_purpose: "",
+    house_type: "",
   });
 };
 
 loanCont.processApplication = async function (req, res) {
-  let nav = await utilities.getNav();
-  const { loan_amount, loan_purpose } = req.body;
-
+  let nav = await utilities.getNav(
+    req.session.loggedin,
+    req.session.accountData,
+  );
+  const { initial_investment, loan_amount, house_type } = req.body;
   const user_id = req.session.accountData.user_id;
 
   const result = await loanModel.createLoanApplication(
     user_id,
     loan_amount,
-    loan_purpose,
+    initial_investment,
+    house_type,
   );
 
   if (result) {
     req.flash("notice", "Application submitted successfully.");
-    res.status(201).render("loans/success", {
-      title: "Success",
-      nav,
-    });
+    res.status(201).redirect("/client");
   } else {
     req.flash("notice", "Sorry, the application failed.");
     res.status(501).render("loans/apply", {
       title: "Apply for a Home Loan",
       nav,
       errors: null,
+      initial_investment,
       loan_amount,
-      loan_purpose,
+      house_type,
     });
   }
 };
 
 loanCont.buildManagement = async function (req, res) {
-  let nav = await utilities.getNav();
-  const loans = await loanModel.getAllLoans();
-  res.render("loans/management", {
+  let nav = await utilities.getNav(
+    req.session.loggedin,
+    req.session.accountData,
+  );
+  const allAccounts = await loanModel.getAllLoans();
+  res.render("client", {
     title: "Loan Management Dashboard",
     nav,
-    loans,
-    errors: null,
+    accountData: req.session.accountData,
+    allAccounts,
   });
 };
 
 loanCont.updateStatus = async function (req, res) {
-  const { loan_id, loan_status } = req.body;
-  await loanModel.updateLoanStatus(loan_id, loan_status);
+  const { user_id, loan_status } = req.body;
+  await loanModel.updateLoanStatus(user_id, loan_status);
   req.flash("notice", "Status updated successfully.");
-  res.redirect("/loans/management");
+  res.redirect("/client");
 };
 
 export default loanCont;

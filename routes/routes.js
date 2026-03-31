@@ -1,17 +1,9 @@
 import express from "express";
+const router = express.Router();
 import controllers from "../controllers/controller.js";
 import validate from "../middleware/account-validation.js";
-import utilities from "../utilities/index.js";
 
-const router = express.Router();
-
-router.get("/", async (req, res) => {
-  const nav = await utilities.getNav();
-  res.render("index", {
-    title: "Home",
-    nav,
-  });
-});
+router.get("/", controllers.buildHome);
 
 router.get("/register", controllers.buildRegister);
 router.post(
@@ -27,5 +19,11 @@ router.post("/login", controllers.loginUser);
 router.get("/logout", controllers.logoutUser);
 
 router.get("/client", validate.clientCheck, controllers.buildClient);
+
+router.post(
+  "/update-status",
+  validate.adminCheck,
+  controllers.updateLoanStatus,
+);
 
 export default router;
